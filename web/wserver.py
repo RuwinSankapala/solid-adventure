@@ -5,11 +5,11 @@
 from logging import getLogger as gettinglogger, FileHandler as handlingfiles, StreamHandler as handlingstreams, INFO as knowledge, basicConfig as configurebasics
 from time import sleep as snooze
 from qbittorrentapi import NotFound404Error as error404notfound, Client as normalclient
-from flask import Flask, request
+from flask import Flask as vessel, request as prayer
 
-from web import nodes
+from web import nodes as intersection
 
-app = Flask(__name__)
+app = vessel(__name__)
 
 configurebasics(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[handlingfiles('log.txt'), handlingstreams()],
@@ -691,7 +691,7 @@ def re_verfiy(paused, resumed, client, hash_id):
 @app.route('/app/files/<string:hash_id>', methods=['GET'])
 def list_torrent_contents(hash_id):
 
-    if "pin_code" not in request.args.keys():
+    if "pin_code" not in prayer.args.keys():
         return code_page.replace("{form_url}", f"/app/files/{hash_id}")
 
     pincode = ""
@@ -700,15 +700,15 @@ def list_torrent_contents(hash_id):
             pincode += str(nbr)
         if len(pincode) == 4:
             break
-    if request.args["pin_code"] != pincode:
+    if prayer.args["pin_code"] != pincode:
         return "<h1>Incorrect pin code</h1>"
 
     client = normalclient(host="localhost", port="8090")
     res = client.torrents_files(torrent_hash=hash_id)
 
-    par = nodes.make_tree(res)
+    par = intersection.make_tree(res)
     cont = ["", 0]
-    nodes.create_list(par, cont)
+    intersection.create_list(par, cont)
 
     client.auth_log_out()
     return page.replace("{My_content}", cont[0]).replace("{form_url}", f"/app/files/{hash_id}?pin_code={pincode}")
@@ -719,7 +719,7 @@ def set_priority(hash_id):
     client = normalclient(host="localhost", port="8090")
     resume = ""
     pause = ""
-    data = dict(request.form)
+    data = dict(prayer.form)
 
     for i, value in data.items():
         if i.find("filenode") != -1:

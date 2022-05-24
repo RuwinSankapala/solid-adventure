@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # (c) YashDK [yash-dk@github]
 
-from anytree import NodeMixin
+from anytree import NodeMixin as mixingnodes
 
-class TorNode(NodeMixin):
+class TorNode(mixingnodes):
     def __init__(self, name, is_folder=False, is_file=False, parent=None, progress=None, size=None, priority=None, file_id=None):
         super().__init__()
         self.name = name

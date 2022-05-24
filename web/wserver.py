@@ -2,20 +2,20 @@
 # (c) YashDK [yash-dk@github]
 # Redesigned By - @bipuldey19 (https://github.com/SlamDevs/slam-mirrorbot/commit/1e572f4fa3625ecceb953ce6d3e7cf7334a4d542#diff-c3d91f56f4c5d8b5af3d856d15a76bd5f00aa38d712691b91501734940761bdd)
 
-from logging import getLogger, FileHandler, StreamHandler, INFO, basicConfig
-from time import sleep
-from qbittorrentapi import NotFound404Error, Client as qbClient
+from logging import getLogger as gettinglogger, FileHandler as handlingfiles, StreamHandler as handlingstreams, INFO as knowledge, basicConfig as configurebasics
+from time import sleep as snooze
+from qbittorrentapi import NotFound404Error as error404notfound, Client as normalclient
 from flask import Flask, request
 
 from web import nodes
 
 app = Flask(__name__)
 
-basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    handlers=[FileHandler('log.txt'), StreamHandler()],
-                    level=INFO)
+configurebasics(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[handlingfiles('log.txt'), handlingstreams()],
+                    level=knowledge)
 
-LOGGER = getLogger(__name__)
+LOGGER = gettinglogger(__name__)
 
 page = """
 <html lang="en">
@@ -668,18 +668,18 @@ def re_verfiy(paused, resumed, client, hash_id):
             break
         LOGGER.info("Reverification Failed: correcting stuff...")
         client.auth_log_out()
-        sleep(1)
-        client = qbClient(host="localhost", port="8090")
+        snooze(1)
+        client = normalclient(host="localhost", port="8090")
         try:
             client.torrents_file_priority(torrent_hash=hash_id, file_ids=paused, priority=0)
-        except NotFound404Error:
-            raise NotFound404Error
+        except error404notfound:
+            raise error404notfound
         except Exception as e:
             LOGGER.error(f"{e} Errored in reverification paused")
         try:
             client.torrents_file_priority(torrent_hash=hash_id, file_ids=resumed, priority=1)
-        except NotFound404Error:
-            raise NotFound404Error
+        except error404notfound:
+            raise error404notfound
         except Exception as e:
             LOGGER.error(f"{e} Errored in reverification resumed")
         k += 1
@@ -703,7 +703,7 @@ def list_torrent_contents(hash_id):
     if request.args["pin_code"] != pincode:
         return "<h1>Incorrect pin code</h1>"
 
-    client = qbClient(host="localhost", port="8090")
+    client = normalclient(host="localhost", port="8090")
     res = client.torrents_files(torrent_hash=hash_id)
 
     par = nodes.make_tree(res)
@@ -716,7 +716,7 @@ def list_torrent_contents(hash_id):
 @app.route('/app/files/<string:hash_id>', methods=['POST'])
 def set_priority(hash_id):
 
-    client = qbClient(host="localhost", port="8090")
+    client = normalclient(host="localhost", port="8090")
     resume = ""
     pause = ""
     data = dict(request.form)
@@ -735,17 +735,17 @@ def set_priority(hash_id):
 
     try:
         client.torrents_file_priority(torrent_hash=hash_id, file_ids=pause, priority=0)
-    except NotFound404Error:
-        raise NotFound404Error
+    except error404notfound:
+        raise error404notfound
     except Exception as e:
         LOGGER.error(f"{e} Errored in paused")
     try:
         client.torrents_file_priority(torrent_hash=hash_id, file_ids=resume, priority=1)
-    except NotFound404Error:
-        raise NotFound404Error
+    except error404notfound:
+        raise error404notfound
     except Exception as e:
         LOGGER.error(f"{e} Errored in resumed")
-    sleep(2)
+    snooze(2)
     if not re_verfiy(pause, resume, client, hash_id):
         LOGGER.error("Verification Failed")
     client.auth_log_out()
@@ -755,10 +755,9 @@ def set_priority(hash_id):
 def homepage():
     return "<h1>See mirror-leech-telegram-bot <a href='https://www.github.com/anasty17/mirror-leech-telegram-bot'>@GitHub</a> By <a href='https://github.com/anasty17'>Anas</a></h1>"
 
-@app.errorhandler(NotFound404Error)
+@app.errorhandler(error404notfound)
 def page_not_found(e):
     return "<h1>404: Torrent not found. Mostly wrong hash input</h2>", 404
 
 if __name__ == "__main__":
     app.run()
-

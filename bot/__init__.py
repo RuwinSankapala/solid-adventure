@@ -394,7 +394,7 @@ except:
     IGNORE_PENDING_REQUESTS = False
 
 try:
-    BASE_URL = environ.get('BASE_URL')
+    BASE_URL = environ.get('BASE_URL_OF_BOT')
     if len(BASE_URL) == 0:
         raise KeyError
 except:

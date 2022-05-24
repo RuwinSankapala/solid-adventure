@@ -392,13 +392,16 @@ try:
     IGNORE_PENDING_REQUESTS = IGNORE_PENDING_REQUESTS.lower() == 'true'
 except:
     IGNORE_PENDING_REQUESTS = False
+
 try:
-    BASE_URL = getConfig('BASE_URL_OF_BOT').rstrip("/")
+    BASE_URL = environ.get('BASE_URL')
     if len(BASE_URL) == 0:
         raise KeyError
 except:
     log_warning('BASE_URL_OF_BOT not provided!')
     BASE_URL = None
+
+
 try:
     AS_DOCUMENT = getConfig('AS_DOCUMENT')
     AS_DOCUMENT = AS_DOCUMENT.lower() == 'true'
